@@ -118,23 +118,86 @@ In this PoC, the digital twin is implemented as a **continuously-updatable state
 
 ## 6. How to Run It
 
-### Setup Instructions (Local)
-1. **Prerequisites:** Python 3.10+ installed.
-2. **Clone the repository.**
-3. **Run the startup script:**
-   * **Windows:** Double-click `run.bat` or execute `.\run.bat` in Command Prompt.
-   * **Mac / Linux:** Run `chmod +x run.sh && ./run.sh`
-4. **Manual Setup:**
-   ```bash
-   pip install -r requirements.txt
-   python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
-   ```
-5. **Access Dashboard:** Open your browser to `http://127.0.0.1:8000`
+### ⚡ Quick Start — Clone & Run
+
+> **Prerequisites:** Python 3.10+ and `git` installed.
+
+#### Step 1 — Clone the repository
+
+```bash
+git clone https://github.com/FarhanK20-hub/ClimaTwin-India---AI-Powered-Digital-Twin-of-India-s-Climate.git
+cd ClimaTwin-India---AI-Powered-Digital-Twin-of-India-s-Climate
+```
+
+#### Step 2 — Run the startup script
+
+**Windows (Command Prompt / PowerShell):**
+```bat
+.\run.bat
+```
+
+**Mac / Linux:**
+```bash
+chmod +x run.sh && ./run.sh
+```
+
+The script automatically:
+- Creates a Python virtual environment (`.venv`)
+- Installs all dependencies from `requirements.txt`
+- Trains the LSTM models on first run (≈2–3 min)
+- Starts the FastAPI backend server
+
+#### Step 3 — Open the dashboard
+
+Open your browser and go to:
+```
+http://127.0.0.1:8000
+```
+
+---
+
+### Manual Setup (Alternative)
+
+If you prefer manual control:
+
+```bash
+# 1. Create and activate a virtual environment
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
+# Mac/Linux:
+source .venv/bin/activate
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Start the server
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+Then open `http://127.0.0.1:8000` in your browser.
+
+---
 
 ### Project Structure
-* `backend/` - FastAPI server (`main.py`), ML logic (`model.py`), Scenario engine (`simulator.py`), Data prep (`preprocess.py`).
-* `frontend/` - SPA UI (`index.html`, `app.js`, `style.css`).
-* `models/` - Saved PyTorch `.pt` model weights.
+
+```
+ClimaTwin-India/
+├── backend/
+│   ├── main.py          # FastAPI server & API routes
+│   ├── model.py         # LSTM + MC Dropout AI engine
+│   ├── simulator.py     # What-If scenario engine
+│   └── preprocess.py    # IMD data parser & synthetic generator
+├── frontend/
+│   ├── index.html       # Single-page dashboard UI
+│   ├── app.js           # Dashboard logic & API calls
+│   ├── style.css        # Styling (black + tricolour theme)
+│   └── favicon.svg      # App favicon
+├── models/              # Saved PyTorch model weights (.pt)
+├── requirements.txt     # Python dependencies
+├── run.bat              # One-click start (Windows)
+└── run.sh               # One-click start (Mac/Linux)
+```
 
 ---
 

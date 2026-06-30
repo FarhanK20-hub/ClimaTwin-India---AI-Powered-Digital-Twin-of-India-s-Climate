@@ -66,9 +66,8 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   background-image:
-    radial-gradient(ellipse at 20% 10%, rgba(56,189,248,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.05) 0%, transparent 60%),
-    radial-gradient(ellipse at 50% 50%, rgba(16,185,129,0.02) 0%, transparent 70%);
+    radial-gradient(ellipse at 50% 0%, rgba(255,153,51,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(19,136,8,0.03) 0%, transparent 50%);
 }
 
 /* ── Scrollbar ── */
@@ -273,7 +272,7 @@ body {
    ════════════════════ */
 .main-container {
   margin-top: 64px;
-  padding: 1.5rem 1.75rem;
+  padding: 1rem 1.5rem;
   max-width: 1800px;
   margin-left: auto; margin-right: auto;
   margin-top: 64px;
@@ -284,18 +283,17 @@ body {
   position: relative; overflow: hidden;
   background: var(--gradient-hero);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 2rem 2.5rem;
-  margin-bottom: 1rem;
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 2rem;
+  margin-bottom: 0.75rem;
   display: flex; align-items: center; justify-content: space-between;
   gap: 1.5rem;
 }
 
 .hero-particles {
   position: absolute; inset: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 30 0 L 60 30 L 30 60 L 0 30 Z' fill='none' stroke='rgba(56,189,248,0.04)' stroke-width='1'/%3E%3C/svg%3E") repeat;
   pointer-events: none;
-  animation: particleShift 20s linear infinite;
+  opacity: 0.4;
 }
 
 @keyframes particleShift {
@@ -322,10 +320,10 @@ body {
 
 .hero-title {
   font-family: var(--font-head);
-  font-size: 2rem; font-weight: 700;
+  font-size: 1.55rem; font-weight: 700;
   line-height: 1.2;
   color: #fff;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.1rem;
 }
 
 .hero-title-accent {
@@ -335,9 +333,10 @@ body {
 }
 
 .hero-subtitle {
-  font-size: 0.88rem; color: var(--text-secondary);
-  max-width: 560px; line-height: 1.65;
-  margin-bottom: 1rem;
+  font-size: 0.82rem; color: var(--text-secondary);
+  max-width: 500px; line-height: 1.55;
+  margin-bottom: 0.75rem;
+  display: none;
 }
 
 .hero-tags {
@@ -364,8 +363,8 @@ body {
   background: var(--bg-glass);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 1rem 1.5rem;
-  min-width: 100px;
+  padding: 0.7rem 1.1rem;
+  min-width: 80px;
   transition: var(--transition);
 }
 .hero-stat:hover {
@@ -375,10 +374,10 @@ body {
 
 .hero-stat-value {
   font-family: var(--font-head);
-  font-size: 1.6rem; font-weight: 700;
+  font-size: 1.3rem; font-weight: 700;
   color: var(--accent-blue);
   line-height: 1;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
 .hero-stat-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
@@ -431,23 +430,23 @@ body {
 
 /* ── Tab Navigation ── */
 .tab-nav {
-  display: flex; gap: 0.25rem;
-  background: var(--bg-glass);
+  display: flex; gap: 0.2rem;
+  background: rgba(255,255,255,0.03);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 0.35rem;
-  margin-bottom: 1.5rem;
+  border-radius: var(--radius-md);
+  padding: 0.25rem;
+  margin-bottom: 1rem;
   width: fit-content;
 }
 
 .tab-btn {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.55rem 1.2rem;
-  border: none; border-radius: var(--radius-md);
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  border: none; border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text-secondary);
   font-family: var(--font-main);
-  font-size: 0.85rem; font-weight: 500;
+  font-size: 0.82rem; font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
   white-space: nowrap;
@@ -471,11 +470,11 @@ body {
 
 /* ── Card Base ── */
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem;
-  box-shadow: var(--shadow-card);
+  background: rgba(12, 12, 12, 0.8);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
   backdrop-filter: blur(12px);
   transition: var(--transition);
   position: relative; overflow: hidden;
@@ -485,14 +484,14 @@ body {
   content: '';
   position: absolute; top: 0; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(56,189,248,0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,153,51,0.2), rgba(19,136,8,0.2), transparent);
 }
 
 .card:hover { border-color: var(--border-glow); box-shadow: var(--shadow-glow); }
 
 .card-header {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 1rem; gap: 0.5rem;
+  margin-bottom: 0.75rem; gap: 0.5rem;
 }
 
 .card-title {
@@ -1349,10 +1348,10 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.25); }
    FOOTER
    ════════════════════ */
 .app-footer {
-  margin-top: 3rem;
-  padding: 1.5rem 1.75rem;
-  border-top: 1px solid var(--border);
-  background: rgba(6,13,26,0.5);
+  margin-top: 2rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0,0,0,0.5);
 }
 
 .footer-content {
@@ -1379,7 +1378,7 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.25); }
    MAP TOOLTIP
    ════════════════════ */
 .map-tooltip {
-  background: rgba(6,13,26,0.95) !important;
+  background: rgba(0,0,0,0.95) !important;
   border: 1px solid rgba(56,189,248,0.3) !important;
   border-radius: 8px !important;
   color: var(--text-primary) !important;
@@ -1391,14 +1390,14 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.25); }
 
 /* Leaflet popup overrides */
 .leaflet-popup-content-wrapper {
-  background: rgba(6,13,26,0.95) !important;
+  background: rgba(0,0,0,0.95) !important;
   border: 1px solid rgba(56,189,248,0.25) !important;
   border-radius: 12px !important;
   color: var(--text-primary) !important;
   box-shadow: 0 8px 30px rgba(0,0,0,0.6) !important;
 }
 
-.leaflet-popup-tip { background: rgba(6,13,26,0.95) !important; }
+.leaflet-popup-tip { background: rgba(0,0,0,0.95) !important; }
 
 /* ════════════════════
    RESPONSIVE
