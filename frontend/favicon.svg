@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1a0a00"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <radialGradient id="globeGrad" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#1a3a2a"/>
+      <stop offset="100%" stop-color="#0a1a10"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="64" height="64" rx="12" fill="url(#bgGlow)"/>
+
+  <!-- Tricolor top stripe glow at top -->
+  <rect x="0" y="0" width="64" height="3" rx="0" fill="#FF9933" opacity="0.9"/>
+  <rect x="0" y="3" width="64" height="3" rx="0" fill="#FFFFFF" opacity="0.7"/>
+  <rect x="0" y="6" width="64" height="3" rx="0" fill="#138808" opacity="0.9"/>
+
+  <!-- Globe circle -->
+  <circle cx="32" cy="36" r="18" fill="url(#globeGrad)" stroke="#FF9933" stroke-width="1.2" opacity="0.95" filter="url(#glow)"/>
+
+  <!-- Globe latitude lines -->
+  <ellipse cx="32" cy="36" rx="18" ry="6" fill="none" stroke="#138808" stroke-width="0.7" opacity="0.5"/>
+  <line x1="14" y1="36" x2="50" y2="36" stroke="#138808" stroke-width="0.7" opacity="0.5"/>
+
+  <!-- Globe longitude line (vertical) -->
+  <ellipse cx="32" cy="36" rx="6" ry="18" fill="none" stroke="#FF9933" stroke-width="0.7" opacity="0.5"/>
+  <ellipse cx="32" cy="36" rx="12" ry="18" fill="none" stroke="#FF9933" stroke-width="0.5" opacity="0.3"/>
+
+  <!-- India shape (simplified polygon highlight) -->
+  <polygon points="30,24 34,24 36,28 37,33 35,40 33,44 31,44 29,40 27,33 28,28" fill="#FF9933" opacity="0.55"/>
+
+  <!-- Ashoka Chakra (simplified) in center -->
+  <circle cx="32" cy="36" r="4" fill="none" stroke="#FFFFFF" stroke-width="1" opacity="0.9"/>
+  <circle cx="32" cy="36" r="1" fill="#FFFFFF" opacity="0.9"/>
+  <!-- 8 spokes -->
+  <line x1="32" y1="32" x2="32" y2="33.5" stroke="#FFFFFF" stroke-width="0.6" opacity="0.9"/>
+  <line x1="32" y1="38.5" x2="32" y2="40" stroke="#FFFFFF" stroke-width="0.6" opacity="0.9"/>
+  <line x1="28" y1="36" x2="29.5" y2="36" stroke="#FFFFFF" stroke-width="0.6" opacity="0.9"/>
+  <line x1="34.5" y1="36" x2="36" y2="36" stroke="#FFFFFF" stroke-width="0.6" opacity="0.9"/>
+  <line x1="29.17" y1="33.17" x2="30.24" y2="34.24" stroke="#FFFFFF" stroke-width="0.6" opacity="0.9"/>
+  <line x1="33.76" y1="37.76" x2="34.83" y2="38.83" stroke="#FFFFFF" stroke-width="0.6" opacity="0.9"/>
+  <line x1="34.83" y1="33.17" x2="33.76" y2="34.24" stroke="#FFFFFF" stroke-width="0.6" opacity="0.9"/>
+  <line x1="30.24" y1="37.76" x2="29.17" y2="38.83" stroke="#FFFFFF" stroke-width="0.6" opacity="0.9"/>
+
+  <!-- Satellite dish (top-left) -->
+  <g transform="translate(10, 10) rotate(-20)" filter="url(#glow)">
+    <ellipse cx="6" cy="4" rx="5.5" ry="4" fill="none" stroke="#FF9933" stroke-width="1.4"/>
+    <line x1="6" y1="4" x2="6" y2="9" stroke="#FF9933" stroke-width="1.2"/>
+    <line x1="4" y1="9" x2="8" y2="9" stroke="#FF9933" stroke-width="1.2"/>
+    <circle cx="6" cy="4" r="1" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Signal arcs from satellite -->
+  <path d="M 18 14 Q 22 10 26 16" fill="none" stroke="#138808" stroke-width="0.9" opacity="0.8" stroke-dasharray="1.5,1"/>
+  <path d="M 15 12 Q 21 6 28 14" fill="none" stroke="#FF9933" stroke-width="0.9" opacity="0.6" stroke-dasharray="1.5,1"/>
+</svg>
