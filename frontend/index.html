@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ClimaTwin India — AI-Powered Digital Twin of India's Climate | ISRO Hack2Skill 2026</title>
+  <meta name="description" content="AI-Powered Digital Twin of India's Climate — Maharashtra Pilot Region. Real-time monitoring, LSTM forecasting, and what-if scenario simulation using IMD and ISRO national datasets."/>
+  <meta name="keywords" content="ISRO, IMD, Digital Twin, Climate, Maharashtra, AI, LSTM, India, Hack2Skill"/>
+  <meta name="author" content="ClimaTwin India Team"/>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <!-- Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Turf.js for spatial clipping -->
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <!-- Our CSS -->
+  <link rel="stylesheet" href="/static/style.css?v=4"/>
+</head>
+<body>
+
+<!-- ════════════════════════════════
+     LOADING SCREEN
+     ════════════════════════════════ -->
+<div class="loading-overlay" id="loadingScreen">
+  <div class="loading-globe">🌏</div>
+  <div class="loading-title">ClimaTwin India</div>
+  <div class="loading-sub">AI-Powered Digital Twin of India's Climate</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+  <div class="loading-steps">
+    <div class="loading-step" style="animation-delay:0.5s" id="ls1">
+      <div class="loading-step-dot"></div> Loading 35 years of IMD gridded climate data
+    </div>
+    <div class="loading-step" style="animation-delay:1.2s" id="ls2">
+      <div class="loading-step-dot"></div> Initializing LSTM prediction models (MC Dropout)
+    </div>
+    <div class="loading-step" style="animation-delay:2.0s" id="ls3">
+      <div class="loading-step-dot"></div> Calibrating digital twin state — Maharashtra pilot
+    </div>
+    <div class="loading-step" style="animation-delay:2.8s" id="ls4">
+      <div class="loading-step-dot"></div> Building geospatial visualization layer
+    </div>
+  </div>
+  <div class="loading-badge">🛰️ ISRO · IMD · MOSDAC · Hack2Skill 2026</div>
+</div>
+
+<!-- ════════════════════════════════
+     NAVBAR
+     ════════════════════════════════ -->
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <div class="navbar-brand">
+    <div class="brand-logo">🛰️</div>
+    <div class="brand-text">
+      <div class="brand-title">ClimaTwin India</div>
+      <div class="brand-sub">AI Digital Twin · Maharashtra Pilot · v2.0</div>
+    </div>
+  </div>
+
+  <div class="navbar-center">
+    <div class="twin-heartbeat" id="twinHeartbeat">
+      <div class="heartbeat-dot"></div>
+      <div class="heartbeat-ring"></div>
+      <span class="heartbeat-label">TWIN ACTIVE</span>
+    </div>
+  </div>
+
+  <div class="navbar-status">
+    <div class="twin-clock" id="twinClockDisplay">
+      <div class="pulse-dot"></div>
+      <span id="clockTime">Loading...</span>
+    </div>
+    <div class="isro-badge">🇮🇳 ISRO · IMD · MOSDAC</div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════
+     MAIN CONTENT
+     ════════════════════════════════ -->
+<div class="main-container">
+
+  <!-- Hero Banner -->
+  <div class="hero-banner">
+    <div class="hero-particles" id="heroParticles"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        🌍 ISRO Hack2Skill 2026 · Problem Statement 5 · Maharashtra Pilot
+      </div>
+      <h1 class="hero-title">AI-Powered Digital Twin<br/><span class="hero-title-accent">of India's Climate</span></h1>
+      <p class="hero-subtitle">
+        A living virtual replica of India's climate that continuously updates from IMD & INSAT satellite data,
+        predicts future states using deep learning, and lets you simulate any climate scenario — from El Niño to 2050 warming.
+      </p>
+      <div class="hero-tags">
+        <span class="hero-tag">🤖 LSTM + MC Dropout</span>
+        <span class="hero-tag">🛰️ INSAT-3R</span>
+        <span class="hero-tag">🌧️ IMD 0.25°</span>
+        <span class="hero-tag">⚡ Real-time State</span>
+        <span class="hero-tag">🔬 What-If Scenarios</span>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-value" id="statDays">12,784</div>
+        <div class="hero-stat-label">Days of Data</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">7</div>
+        <div class="hero-stat-label">Cities Monitored</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">6</div>
+        <div class="hero-stat-label">Variables Tracked</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value" id="statSkill">—</div>
+        <div class="hero-stat-label">AI Skill Score</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Narrative Banner -->
+  <div class="narrative-banner" id="narrativeBanner">
+    <div class="narrative-icon">🤖</div>
+    <div class="narrative-content">
+      <div class="narrative-label">AI CLIMATE INTELLIGENCE</div>
+      <div class="narrative-text" id="narrativeText">Initializing climate narrative...</div>
+    </div>
+    <div class="narrative-city-selector">
+      <select id="narrativeCitySelect" onchange="loadNarrative(this.value)" class="select-input-sm">
+        <option>Mumbai</option><option>Pune</option><option>Nagpur</option>
+        <option>Nashik</option><option>Aurangabad</option><option>Solapur</option><option>Kolhapur</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <nav class="tab-nav" role="tablist" aria-label="Dashboard sections">
+    <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')" id="tab-overview" role="tab">
+      <span>🗺️</span> <span>Climate State</span>
+    </button>
+    <button class="tab-btn" data-tab="forecast" onclick="switchTab('forecast')" id="tab-forecast" role="tab">
+      <span>📈</span> <span>AI Forecast</span>
+    </button>
+    <button class="tab-btn" data-tab="scenario" onclick="switchTab('scenario')" id="tab-scenario" role="tab">
+      <span>🔬</span> <span>What-If Scenarios</span>
+    </button>
+    <button class="tab-btn" data-tab="metrics" onclick="switchTab('metrics')" id="tab-metrics" role="tab">
+      <span>📊</span> <span>Model Performance</span>
+    </button>
+    <button class="tab-btn" data-tab="about" onclick="switchTab('about')" id="tab-about" role="tab">
+      <span>ℹ️</span> <span>Architecture</span>
+    </button>
+  </nav>
+
+  <!-- ══════════════════════════════
+       TAB: OVERVIEW (Climate State)
+       ══════════════════════════════ -->
+  <div class="section-tab active" id="tab-content-overview">
+    <div class="dashboard-grid">
+
+      <!-- Map Section -->
+      <div class="card" id="map-section">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">🗺️</span> India Climate Map — Real-time Digital Twin State
+          </div>
+          <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+            <div class="map-controls">
+              <button class="map-var-btn active" id="mapBtn-rainfall" onclick="switchMapVar('rainfall')">🌧️ Rainfall</button>
+              <button class="map-var-btn" id="mapBtn-max_temp" onclick="switchMapVar('max_temp')">🌡️ Max Temp</button>
+              <button class="map-var-btn" id="mapBtn-min_temp" onclick="switchMapVar('min_temp')">❄️ Min Temp</button>
+              <button class="map-var-btn" id="mapBtn-humidity" onclick="switchMapVar('humidity')">💧 Humidity</button>
+            </div>
+            <input type="date" class="map-date-input" id="mapDateInput" value="2024-07-15"
+                   onchange="refreshMap()" aria-label="Map date"/>
+          </div>
+        </div>
+
+        <div class="map-container">
+          <div id="climate-map"></div>
+          <div class="map-legend" id="mapLegend">
+            <div class="legend-title" id="legendTitle">Rainfall (mm/day)</div>
+            <div class="legend-bar" id="legendBar"
+                 style="background: linear-gradient(to right, #f0f9ff, #0369a1, #1e3a5f)"></div>
+            <div class="legend-labels">
+              <span id="legendMin">0</span>
+              <span id="legendMid">—</span>
+              <span id="legendMax">—</span>
+            </div>
+          </div>
+          <div class="data-source-tag">🛰️ IMD 0.25° + INSAT-3R</div>
+          <div class="map-click-hint" id="mapClickHint">
+            👆 Click any city marker to view its full profile
+          </div>
+        </div>
+
+        <!-- Time Scrubber -->
+        <div class="time-scrubber" id="timeScrubber">
+          <button class="scrubber-btn" id="scrubberPlayBtn" onclick="toggleTimeScrubber()" title="Play/Pause">▶</button>
+          <div class="scrubber-track">
+            <input type="range" id="timeSlider" min="0" max="29" value="0"
+                   oninput="onTimeSliderChange(this.value)" aria-label="Time scrubber"/>
+            <div class="scrubber-dates">
+              <span>Jul 1</span>
+              <span id="scrubberCurrentDate">Jul 15</span>
+              <span>Jul 30</span>
+            </div>
+          </div>
+          <div class="scrubber-label">📅 30-Day Animation</div>
+        </div>
+      </div>
+
+      <!-- Twin State Panel -->
+      <div class="card twin-state-panel" id="twin-state-section">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🔄</span> Digital Twin State</div>
+          <div class="card-badge live-badge">LIVE</div>
+        </div>
+
+        <div class="twin-header">
+          <div class="pulse-dot"></div>
+          <div class="twin-label">Data Assimilation Active</div>
+          <div class="twin-time" id="twinUpdateTime">—</div>
+        </div>
+
+        <div class="assimilation-bar">
+          <div class="assim-label">Next Update</div>
+          <div class="assim-track"><div class="assim-fill" id="assimFill"></div></div>
+          <div class="assim-time" id="assimTime">6h</div>
+        </div>
+
+        <div class="city-state-list" id="cityStateList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Alerts Panel -->
+      <div class="card" style="grid-column:1; grid-row:3;">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🚨</span> Anomaly Alerts</div>
+          <div class="card-badge" id="alertCount">—</div>
+        </div>
+        <div class="alert-list" id="alertList">
+          <div style="color:var(--text-muted); font-size:0.8rem; text-align:center; padding:1rem;">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Forecast Preview -->
+      <div class="card" style="grid-column:2; grid-row:3;">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📉</span> Quick Forecast</div>
+          <div style="display:flex; gap:0.5rem; align-items:center;">
+            <select id="quickForecastCitySelect" onchange="loadQuickForecast(this.value)" class="select-input-sm" aria-label="Select city for quick forecast">
+              <option>Mumbai</option><option>Pune</option><option>Nagpur</option>
+              <option>Nashik</option><option>Aurangabad</option><option>Solapur</option><option>Kolhapur</option>
+            </select>
+            <div class="card-badge">7-Day LSTM</div>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="quickForecastChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       TAB: AI FORECAST
+       ══════════════════════════════ -->
+  <div class="section-tab" id="tab-content-forecast">
+    <div class="dashboard-grid" style="grid-template-columns:1fr 1fr 340px;">
+
+      <!-- Historical Chart -->
+      <div class="card" style="grid-column:1/3;">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📈</span> Historical Climate Analysis + AI Forecast</div>
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <select class="select-input" id="forecastCity" onchange="loadForecast()" aria-label="Select city">
+              <option>Mumbai</option><option>Pune</option><option>Nagpur</option>
+              <option>Nashik</option><option>Aurangabad</option><option>Solapur</option><option>Kolhapur</option>
+            </select>
+            <select class="select-input" id="forecastVar" onchange="loadForecast()" aria-label="Select variable">
+              <option value="rainfall">Rainfall</option>
+              <option value="max_temp">Max Temperature</option>
+              <option value="min_temp">Min Temperature</option>
+            </select>
+            <select class="select-input" id="forecastResample" onchange="loadForecast()" aria-label="Time resolution">
+              <option value="M">Monthly</option>
+              <option value="W">Weekly</option>
+              <option value="Y">Yearly</option>
+            </select>
+          </div>
+        </div>
+        <div style="height:280px; position:relative;">
+          <canvas id="historicalChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Forecast Details -->
+      <div class="card" style="grid-column:3; grid-row:1/3;">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🤖</span> LSTM Prediction</div>
+          <div class="card-badge" id="forecastModelBadge">7-Day</div>
+        </div>
+        <div id="forecastStatsBox">
+          <div style="color:var(--text-muted); font-size:0.8rem; text-align:center; padding:2rem;">
+            <div class="spinner"></div>
+            <div style="margin-top:0.5rem;">Loading forecast...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7-day forecast chart -->
+      <div class="card" style="grid-column:1/3; grid-row:2;">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🔮</span> 7-Day AI Forecast with Uncertainty Bands</div>
+          <div class="card-badge">MC Dropout · 50 Samples</div>
+        </div>
+        <div style="height:220px; position:relative;">
+          <canvas id="forecastChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       TAB: WHAT-IF SCENARIOS
+       ══════════════════════════════ -->
+  <div class="section-tab" id="tab-content-scenario">
+
+    <!-- Preset Cards -->
+    <div class="card" style="margin-bottom:1.25rem;">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">🎛️</span> Climate Scenario Presets</div>
+        <div class="card-badge">Select or Customize</div>
+      </div>
+      <div class="scenario-presets" id="scenarioPresetGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 360px 1fr; gap:1.25rem; margin-bottom:1.25rem;">
+
+      <!-- Custom Sliders -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom:1rem;"><span class="icon">🎚️</span> Custom Parameters</div>
+        <div class="scenario-sliders">
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>🌡️ Temperature Delta</span>
+              <span class="slider-value" id="tempDeltaVal">0°C</span>
+            </div>
+            <input type="range" id="tempDeltaSlider" min="-3" max="6" step="0.5" value="0"
+                   oninput="updateSliderDisplay()" aria-label="Temperature delta"/>
+          </div>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>🌧️ Rainfall Change</span>
+              <span class="slider-value" id="rainPctVal">0%</span>
+            </div>
+            <input type="range" id="rainPctSlider" min="-80" max="100" step="5" value="0"
+                   oninput="updateSliderDisplay()" aria-label="Rainfall percentage change"/>
+          </div>
+
+          <button class="btn-primary" style="width:100%; justify-content:center;"
+                  onclick="runScenario()" id="runScenarioBtn">
+            ▶ Run Simulation
+          </button>
+          <button class="btn-secondary" style="width:100%; justify-content:center;"
+                  onclick="resetScenario()">
+            ↺ Reset to Normal
+          </button>
+
+          <!-- Scenario Quick Info -->
+          <div class="scenario-quick-info" id="scenarioQuickInfo" style="display:none;">
+            <div class="sqi-title" id="sqiTitle">—</div>
+            <div class="sqi-desc" id="sqiDesc">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map with scenario overlay -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🗺️</span> Scenario Impact Map</div>
+          <div class="card-badge" id="scenarioBadge">Normal Conditions</div>
+        </div>
+        <div class="map-container" style="height:320px;">
+          <div id="scenario-map"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Impact Results (shown after run) -->
+    <div id="scenarioResultSection" style="display:none;">
+      <div class="card" style="margin-bottom:1.25rem;">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📊</span> State-Level Impact Summary</div>
+          <div class="card-badge" id="scenarioResultName">—</div>
+        </div>
+        <div class="impact-grid" id="impactGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:1.25rem; margin-bottom:1.25rem;">
+        <div class="card" style="grid-column:1/3;">
+          <div class="card-title" style="margin-bottom:1rem;"><span class="icon">🏙️</span> City-by-City Impact</div>
+          <div style="overflow-x:auto;">
+            <table class="city-impact-table" id="cityImpactTable">
+              <thead>
+                <tr>
+                  <th>City</th>
+                  <th>Rain (mm/d)</th>
+                  <th>Temp (°C)</th>
+                  <th>Flood Risk</th>
+                  <th>Drought Risk</th>
+                  <th>Heat Stress</th>
+                  <th>River Impact</th>
+                </tr>
+              </thead>
+              <tbody id="cityImpactBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:1rem;"><span class="icon">💡</span> Recommendations</div>
+          <div class="recommendation-list" id="recommendationList"></div>
+        </div>
+      </div>
+
+      <!-- Reservoir Status -->
+      <div class="card" style="margin-bottom:1.25rem;">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🏞️</span> Maharashtra Reservoir Status</div>
+          <div class="card-badge">Under Scenario</div>
+        </div>
+        <div class="reservoir-grid" id="reservoirGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       TAB: MODEL METRICS
+       ══════════════════════════════ -->
+  <div class="section-tab" id="tab-content-metrics">
+    <div class="card" style="margin-bottom:1.25rem;">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">🤖</span> AI Model Architecture</div>
+        <div class="card-badge">LSTM · ConvLSTM · MC Dropout</div>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(5,1fr); gap:1rem;">
+        <div class="pipeline-step">
+          <div class="pipeline-icon">📦</div>
+          <div class="pipeline-label">Input Layer</div>
+          <div class="pipeline-sub">30-day sequence</div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-icon">🔗</div>
+          <div class="pipeline-label">LSTM Encoder</div>
+          <div class="pipeline-sub">2 layers · 64 hidden</div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-icon">🎲</div>
+          <div class="pipeline-label">MC Dropout</div>
+          <div class="pipeline-sub">50 forward passes</div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-icon">📐</div>
+          <div class="pipeline-label">Uncertainty</div>
+          <div class="pipeline-sub">95% CI bands</div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-icon">📤</div>
+          <div class="pipeline-label">Output</div>
+          <div class="pipeline-sub">7-day forecast</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.25rem;">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">📊</span> Validation Metrics — All Models</div>
+        <div class="card-badge" id="metricsStatus">Loading...</div>
+      </div>
+      <div class="metrics-grid" id="metricsGrid">
+        <div style="color:var(--text-muted); font-size:0.8rem; text-align:center; padding:2rem; grid-column:1/-1;">
+          <div class="spinner"></div>
+          <div style="margin-top:0.5rem;">Training models... (takes 2–3 min on first run)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">📉</span> Training vs. Persistence Baseline Comparison</div>
+      </div>
+      <div style="height:240px; position:relative;">
+        <canvas id="metricsCompareChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       TAB: ARCHITECTURE
+       ══════════════════════════════ -->
+  <div class="section-tab" id="tab-content-about">
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.25rem;">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:1rem;"><span class="icon">🏗️</span> System Architecture — Digital Twin Pipeline</div>
+        <div class="data-pipeline">
+          <div class="pipeline-step" style="background: rgba(56,189,248,0.08); border-color: rgba(56,189,248,0.3);">
+            <div class="pipeline-icon">🛰️</div>
+            <div class="pipeline-label">INSAT-3R</div>
+            <div class="pipeline-sub">LST · SST · IMC</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step" style="background: rgba(56,189,248,0.08); border-color: rgba(56,189,248,0.3);">
+            <div class="pipeline-icon">🌧️</div>
+            <div class="pipeline-label">IMD Gridded</div>
+            <div class="pipeline-sub">0.25° · 1.0°</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step" style="background: rgba(139,92,246,0.08); border-color: rgba(139,92,246,0.3);">
+            <div class="pipeline-icon">⚙️</div>
+            <div class="pipeline-label">Preprocessing</div>
+            <div class="pipeline-sub">QC · Regrid · Norm</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step" style="background: rgba(139,92,246,0.08); border-color: rgba(139,92,246,0.3);">
+            <div class="pipeline-icon">🤖</div>
+            <div class="pipeline-label">LSTM Engine</div>
+            <div class="pipeline-sub">Train · Predict · CI</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step" style="background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.3);">
+            <div class="pipeline-icon">🔄</div>
+            <div class="pipeline-label">Digital Twin</div>
+            <div class="pipeline-sub">State · Scenarios</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step" style="background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.3);">
+            <div class="pipeline-icon">📱</div>
+            <div class="pipeline-label">Dashboard</div>
+            <div class="pipeline-sub">Maps · Charts · AI</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:1rem;"><span class="icon">📡</span> Data Sources</div>
+        <div style="display:flex; flex-direction:column; gap:0.6rem;">
+          <div class="alert-item" style="border-left-color: var(--accent-blue);">
+            <div class="alert-icon">🛰️</div>
+            <div class="alert-content">
+              <div class="alert-city">INSAT-3R / MOSDAC</div>
+              <div class="alert-msg">LST (3RIMG_L2B_LST), SST (3RIMG_L2B_SST), Rainfall (3RIMG_L2B_IMC) — ISRO geostationary</div>
+            </div>
+          </div>
+          <div class="alert-item" style="border-left-color: var(--accent-cyan);">
+            <div class="alert-icon">🌧️</div>
+            <div class="alert-content">
+              <div class="alert-city">IMD Gridded Rainfall</div>
+              <div class="alert-msg">0.25° × 0.25° daily gridded dataset (1901–present), imdpune.gov.in</div>
+            </div>
+          </div>
+          <div class="alert-item" style="border-left-color: var(--accent-orange);">
+            <div class="alert-icon">🌡️</div>
+            <div class="alert-content">
+              <div class="alert-city">IMD Gridded Temperature</div>
+              <div class="alert-msg">1.0° × 1.0° Max/Min daily temperature (1951–present)</div>
+            </div>
+          </div>
+          <div class="alert-item" style="border-left-color: var(--accent-green);">
+            <div class="alert-icon">🗺️</div>
+            <div class="alert-content">
+              <div class="alert-city">Bhuvan / NICES / MOSDAC</div>
+              <div class="alert-msg">ISRO national GIS, vegetation stress, soil moisture layers</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.25rem;">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:0.75rem;"><span class="icon">🎯</span> Deliverables Addressed</div>
+        <div style="display:flex; flex-direction:column; gap:0.4rem;">
+          <div class="recommendation-item">✅ Scalable AI-driven digital twin framework</div>
+          <div class="recommendation-item">✅ High-resolution rainfall & temperature predictions</div>
+          <div class="recommendation-item">✅ Interactive geospatial map dashboard</div>
+          <div class="recommendation-item">✅ What-if scenario simulation module</div>
+          <div class="recommendation-item">✅ LSTM model with uncertainty quantification</div>
+          <div class="recommendation-item">✅ Explainable AI (feature importance)</div>
+          <div class="recommendation-item">✅ AI-generated decision narratives</div>
+          <div class="recommendation-item">✅ Cascading impact model (crop, river, reservoir)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:0.75rem;"><span class="icon">🔬</span> AI Methods</div>
+        <div style="display:flex; flex-direction:column; gap:0.4rem;">
+          <div class="recommendation-item">🤖 LSTM (2-layer, 64 hidden) for temporal forecasting</div>
+          <div class="recommendation-item">🎲 Monte Carlo Dropout for uncertainty bands</div>
+          <div class="recommendation-item">🌊 ConvLSTM cell for spatial field prediction</div>
+          <div class="recommendation-item">📊 Permutation-based feature importance</div>
+          <div class="recommendation-item">📉 Cosine annealing LR scheduling</div>
+          <div class="recommendation-item">🏆 Skill score vs. persistence baseline</div>
+          <div class="recommendation-item">🔤 Rule-based NLG for climate narratives</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:0.75rem;"><span class="icon">📈</span> Scalability Path</div>
+        <div style="display:flex; flex-direction:column; gap:0.4rem;">
+          <div class="recommendation-item">🌏 Extend to all-India 0.25° spatial domain</div>
+          <div class="recommendation-item">☁️ Deploy on ISRO cloud / NIC infrastructure</div>
+          <div class="recommendation-item">🔄 Real-time data assimilation pipeline (6-hr)</div>
+          <div class="recommendation-item">🌾 Sector-specific impact modules (agri, water)</div>
+          <div class="recommendation-item">🤝 API integration with Bhuvan portal</div>
+          <div class="recommendation-item">🐳 Docker containerization for production</div>
+          <div class="recommendation-item">🌐 Connect to live MOSDAC/IMD APIs</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /main-container -->
+
+<!-- ════════════════════════════════
+     CITY PROFILE MODAL
+     ════════════════════════════════ -->
+<div class="modal-overlay" id="cityModal" onclick="closeCityModal(event)">
+  <div class="modal-container" id="cityModalContainer">
+    <button class="modal-close" onclick="closeCityModalDirect()">✕</button>
+
+    <div class="modal-header">
+      <div class="modal-city-icon" id="modalCityIcon">🏙️</div>
+      <div>
+        <div class="modal-city-name" id="modalCityName">—</div>
+        <div class="modal-city-sub" id="modalCitySub">—</div>
+      </div>
+      <div class="modal-status-badge" id="modalStatusBadge">Loading...</div>
+    </div>
+
+    <!-- Current Conditions -->
+    <div class="modal-section">
+      <div class="modal-section-title">⚡ Current Conditions</div>
+      <div class="modal-conditions-grid" id="modalConditions">
+        <div class="spinner" style="grid-column:1/-1; justify-self:center;"></div>
+      </div>
+    </div>
+
+    <!-- Risk Gauges -->
+    <div class="modal-section">
+      <div class="modal-section-title">⚠️ Risk Assessment</div>
+      <div class="modal-risk-gauges" id="modalRiskGauges">
+        <div class="spinner" style="grid-column:1/-1; justify-self:center;"></div>
+      </div>
+    </div>
+
+    <!-- Sparkline Charts -->
+    <div class="modal-section">
+      <div class="modal-section-title">📈 Historical Trend (Last 90 Days)</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:0.3rem;">Rainfall (mm/week)</div>
+          <div style="height:80px;"><canvas id="modalRainfallSparkline"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:0.3rem;">Max Temp (°C)</div>
+          <div style="height:80px;"><canvas id="modalTempSparkline"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7-Day Forecast -->
+    <div class="modal-section" id="modalForecastSection">
+      <div class="modal-section-title">🔮 7-Day AI Forecast</div>
+      <div id="modalForecastContent">
+        <div class="spinner" style="justify-self:center;"></div>
+      </div>
+    </div>
+
+    <!-- Feature Importance -->
+    <div class="modal-section">
+      <div class="modal-section-title">🔍 AI Explainability — Feature Importance</div>
+      <div id="modalFeatureImportance">
+        <div class="spinner" style="justify-self:center;"></div>
+      </div>
+    </div>
+
+    <!-- AI Narrative -->
+    <div class="modal-section">
+      <div class="modal-section-title">🤖 AI Climate Narrative</div>
+      <div class="modal-narrative" id="modalNarrative">Loading...</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     FOOTER
+     ════════════════════════════════ -->
+<footer class="app-footer">
+  <div class="footer-content">
+    <div class="footer-brand">
+      <span class="footer-logo">🛰️</span>
+      <span class="footer-name">ClimaTwin India v2.0</span>
+    </div>
+    <div class="footer-tags">
+      <span>ISRO Hack2Skill 2026</span>
+      <span>·</span>
+      <span>Problem Statement 5</span>
+      <span>·</span>
+      <span>Maharashtra Pilot Region</span>
+      <span>·</span>
+      <span>Atmanirbhar Bharat</span>
+    </div>
+    <div class="footer-data">
+      Data: IMD · INSAT-3R · MOSDAC · Bhuvan
+    </div>
+  </div>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
